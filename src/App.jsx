@@ -18,18 +18,25 @@ const convertTaskData = (task) =>{
   return fixedTask;
 };
 const toggleCompleteAPICall = (taskID, taskState) =>{
-  console.log('Start api call');
   let patchURL ='';
   if (taskState === false){
     patchURL = `${kbaseURL}/tasks/${taskID}/mark_complete`;
   }else{
     patchURL = `${kbaseURL}/tasks/${taskID}/mark_incomplete`;
   }
-  console.log(patchURL);
   return axios.patch(patchURL)
     .then(response =>{
       const fixedTask = convertTaskData(response.data.task);
       return fixedTask;
+    })
+    .catch(error =>{console.log(error);});
+};
+
+const deleteTaskAPICall = (taskID) =>{
+  console.log('inside deleteTaskAPICall');
+  return axios.delete(`${kbaseURL}/tasks/${taskID}`)
+    .then(response =>{
+      return response.data;
     })
     .catch(error =>{console.log(error);});
 };
@@ -54,18 +61,24 @@ const App = () => {
     const task = taskData.find(task => task.id === taskID);
     const taskState = task.isComplete;
     console.log(taskID, taskState);
-    const updatedTask = toggleCompleteAPICall(taskID, taskState);
-    setTaskData(tasks => tasks.map(task =>{
-      if (task.id === taskID){
-        return updatedTask;
-      }else{
-        return task;
-      }
-    }));
+    toggleCompleteAPICall(taskID, taskState)
+      .then(updatedTask =>{
+        setTaskData(tasks => tasks.map(task =>{
+          if (task.id === updatedTask.id){
+            return updatedTask;
+          }else{
+            return task;
+          }
+        }));
+      });
   };
 
   const deleteTask = (taskID) =>{
-    setTaskData(tasks => tasks.filter(task => task.id != taskID));
+    deleteTaskAPICall(taskID)
+      .then(response =>{
+        console.log(response.data);
+        setTaskData(tasks => tasks.filter(task => task.id != taskID));
+      });
   };
 
   return (
