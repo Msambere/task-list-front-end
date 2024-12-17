@@ -1,33 +1,68 @@
 import TaskList from './components/TaskList.jsx';
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const TASKS = [
-  {
-    id: 1,
-    title: 'Mow the lawn',
-    isComplete: false,
-  },
-  {
-    id: 2,
-    title: 'Cook Pasta',
-    isComplete: true,
-  },
-];
+
+const kbaseURL = 'http://localhost:5000';
+const taskDataAPICall = () =>{
+  return axios.get(`${kbaseURL}/tasks`)
+    .then(response =>{
+      return response.data;
+    });
+};
+
+const convertTaskData = (task) =>{
+  let fixedTask = {...task, isComplete: task.is_complete};
+  delete fixedTask.is_complete;
+  return fixedTask;
+};
+const toggleCompleteAPICall = (taskID, taskState) =>{
+  console.log('Start api call');
+  let patchURL ='';
+  if (taskState === false){
+    patchURL = `${kbaseURL}/tasks/${taskID}/mark_complete`;
+  }else{
+    patchURL = `${kbaseURL}/tasks/${taskID}/mark_incomplete`;
+  }
+  console.log(patchURL);
+  return axios.patch(patchURL)
+    .then(response =>{
+      const fixedTask = convertTaskData(response.data.task);
+      return fixedTask;
+    })
+    .catch(error =>{console.log(error);});
+};
 
 const App = () => {
-  const [taskData, setTaskData] = useState(TASKS);
+  const [taskData, setTaskData] = useState([]);
+
+  useEffect(() =>{
+    retrieveTaskData();
+  }, []);
+
+  const retrieveTaskData = () =>{
+    taskDataAPICall()
+      .then(data =>{
+        const newData = data.map(task =>convertTaskData(task));
+        setTaskData(newData);
+      });
+  };
+
 
   const toggleComplete = (taskID) =>{
+    const task = taskData.find(task => task.id === taskID);
+    const taskState = task.isComplete;
+    console.log(taskID, taskState);
+    const updatedTask = toggleCompleteAPICall(taskID, taskState);
     setTaskData(tasks => tasks.map(task =>{
       if (task.id === taskID){
-        return {...task, isComplete: !task.isComplete};
+        return updatedTask;
       }else{
         return task;
       }
     }));
   };
-
 
   const deleteTask = (taskID) =>{
     setTaskData(tasks => tasks.filter(task => task.id != taskID));
