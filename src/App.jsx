@@ -2,7 +2,7 @@ import TaskList from './components/TaskList.jsx';
 import './App.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import NewTaskForm from './components/NewTaskForm.jsx';
 
 const kbaseURL = 'http://localhost:5000';
 const taskDataAPICall = () =>{
@@ -26,14 +26,12 @@ const toggleCompleteAPICall = (taskID, taskState) =>{
   }
   return axios.patch(patchURL)
     .then(response =>{
-      const fixedTask = convertTaskData(response.data.task);
-      return fixedTask;
+      return response.data;
     })
     .catch(error =>{console.log(error);});
 };
 
 const deleteTaskAPICall = (taskID) =>{
-  console.log('inside deleteTaskAPICall');
   return axios.delete(`${kbaseURL}/tasks/${taskID}`)
     .then(response =>{
       return response.data;
@@ -41,12 +39,16 @@ const deleteTaskAPICall = (taskID) =>{
     .catch(error =>{console.log(error);});
 };
 
+const submitNewTaskAPICall = (newTask) =>{
+  return axios.post(`${kbaseURL}/tasks`, newTask)
+    .then(response =>{
+      return response.data
+    })
+};
+
+
 const App = () => {
   const [taskData, setTaskData] = useState([]);
-
-  useEffect(() =>{
-    retrieveTaskData();
-  }, []);
 
   const retrieveTaskData = () =>{
     taskDataAPICall()
@@ -56,13 +58,18 @@ const App = () => {
       });
   };
 
+  useEffect(() =>{
+    retrieveTaskData();
+  }, []);
+
+
 
   const toggleComplete = (taskID) =>{
     const task = taskData.find(task => task.id === taskID);
     const taskState = task.isComplete;
-    console.log(taskID, taskState);
     toggleCompleteAPICall(taskID, taskState)
-      .then(updatedTask =>{
+      .then(response =>{
+        const updatedTask = convertTaskData(response.task);
         setTaskData(tasks => tasks.map(task =>{
           if (task.id === updatedTask.id){
             return updatedTask;
@@ -76,10 +83,20 @@ const App = () => {
   const deleteTask = (taskID) =>{
     deleteTaskAPICall(taskID)
       .then(response =>{
-        console.log(response.data);
-        setTaskData(tasks => tasks.filter(task => task.id != taskID));
+        console.log(response);
+        // setTaskData(tasks => tasks.filter(task => task.id != taskID));
+        retrieveTaskData();
       });
   };
+
+  const submitNewTask = (newTask) =>{
+    submitNewTaskAPICall(newTask)
+      .then(response =>{
+        const newTask = convertTaskData(response.task);
+        setTaskData([...taskData, newTask]);
+      });
+  };
+
 
   return (
     <div className="App">
@@ -88,6 +105,7 @@ const App = () => {
       </header>
       <main>
         <div><TaskList tasks={taskData} toggleComplete={toggleComplete} deleteTask={deleteTask}/></div>
+        <NewTaskForm submitNewTask={submitNewTask}/>
       </main>
     </div>
   );
