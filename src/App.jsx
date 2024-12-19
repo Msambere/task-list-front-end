@@ -2,9 +2,8 @@ import TaskList from './components/TaskList.jsx';
 import './App.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import NewTaskForm from './components/NewTaskForm.jsx';
-
 const kbaseURL = 'http://localhost:5000';
+
 const taskDataAPICall = () =>{
   return axios.get(`${kbaseURL}/tasks`)
     .then(response =>{
@@ -17,6 +16,7 @@ const convertTaskData = (task) =>{
   delete fixedTask.is_complete;
   return fixedTask;
 };
+
 const toggleCompleteAPICall = (taskID, taskState) =>{
   let patchURL ='';
   if (taskState === false){
@@ -39,12 +39,6 @@ const deleteTaskAPICall = (taskID) =>{
     .catch(error =>{console.log(error);});
 };
 
-const submitNewTaskAPICall = (newTask) =>{
-  return axios.post(`${kbaseURL}/tasks`, newTask)
-    .then(response =>{
-      return response.data
-    })
-};
 
 
 const App = () => {
@@ -89,15 +83,6 @@ const App = () => {
       });
   };
 
-  const submitNewTask = (newTask) =>{
-    submitNewTaskAPICall(newTask)
-      .then(response =>{
-        const newTask = convertTaskData(response.task);
-        setTaskData([...taskData, newTask]);
-      });
-  };
-
-
   return (
     <div className="App">
       <header className="App-header">
@@ -105,7 +90,6 @@ const App = () => {
       </header>
       <main>
         <div><TaskList tasks={taskData} toggleComplete={toggleComplete} deleteTask={deleteTask}/></div>
-        <NewTaskForm submitNewTask={submitNewTask}/>
       </main>
     </div>
   );
