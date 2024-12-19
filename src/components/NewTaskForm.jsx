@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import './NewTaskForm.css';
 
 const NewTaskForm = ({submitNewTask}) => {
   const [taskDetails, setTaskDetails] = useState({title: '', description: ''});
