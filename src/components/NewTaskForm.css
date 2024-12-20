@@ -1,0 +1,26 @@
+.new-tasks__form{
+    margin: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    column-gap: 8px;
+}
+.new-tasks__form--create{
+    /* top: 50%; */
+    /* right: 0; */
+    background-color: #1779ba;
+    color: #fefefe;
+    border-radius: 8px;
+    padding: 4px;
+    height: 30px;
+    /* transform: translateY(-50%); */
+    /* padding: 0.85em 2.25em 0.85em 1em; */
+    font-size: 100%;
+    margin: 0 0 0 8px;
+}
+
+.new-tasks__form--create:hover {
+    background-color: #0e3f60;
+    border-color: rgba(0, 0, 0, 0.15);
+  }

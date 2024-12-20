@@ -1,4 +1,5 @@
 import TaskList from './components/TaskList.jsx';
+import NewTaskForm from './components/NewTaskForm.jsx';
 import './App.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -39,10 +40,27 @@ const deleteTaskAPICall = (taskID) =>{
     .catch(error =>{console.log(error);});
 };
 
-
+const createTaskAPICall = (newTask) =>{
+  return axios.post(`${kbaseURL}/tasks`,newTask)
+    .then(response =>{
+      return response.data;
+    })
+    .catch(error =>{console.log(error);});
+};
 
 const App = () => {
-  const [taskData, setTaskData] = useState([]);
+  const [taskData, setTaskData] = useState([
+    {
+      id: 1,
+      title: 'task one',
+      isComplete: false,
+    },
+    {
+      id: 42,
+      title: 'task 2',
+      isComplete: true,
+    },
+  ]);
 
   const retrieveTaskData = () =>{
     taskDataAPICall()
@@ -82,14 +100,25 @@ const App = () => {
         retrieveTaskData();
       });
   };
+  const createTask = (newTask) =>{    
+    createTaskAPICall(newTask)
+    .then(response =>{
+      console.log(response);
+      retrieveTaskData();
+    });
+    
+  };
 
   return (
     <div className="App">
       <header className="App-header">
         <h1>Ada&apos;s Task List</h1>
       </header>
+      <NewTaskForm handleCreateTask={createTask}/>
       <main>
-        <div><TaskList tasks={taskData} toggleComplete={toggleComplete} deleteTask={deleteTask}/></div>
+        <div>
+          <TaskList tasks={taskData} toggleComplete={toggleComplete} deleteTask={deleteTask}/>
+        </div>
       </main>
     </div>
   );
